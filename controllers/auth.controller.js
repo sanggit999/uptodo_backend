@@ -64,4 +64,46 @@ const signup = async (req, res) => {
   }
 };
 
-module.exports = { signup };
+// Đăng nhập
+const login = async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ success: false, massage: "Không được để trống" });
+    }
+
+    // Tìm user theo username
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Tài khoản không tồn tại" });
+    }
+
+    // So sánh mật khẩu với hash trong cơ sở dữ liệu
+    const isPasswordMatch = await bcryptjs.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Mật khẩu không chính xác" });
+    }
+
+    // Tạo JWT token
+    const token = await generateToken(user._id);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        ...user._doc,
+        token: token,
+      },
+    });
+  } catch (error) {
+    console.log("Lỗi trong bộ điều khiển đăng ký", error.message);
+    res.status(500).json({ success: false, message: "Lỗi máy chủ nội bộ" });
+  }
+};
+
+module.exports = { signup, login };
