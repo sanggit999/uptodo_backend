@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const { ENV_VARS } = require("./envVars");
+import mongoose from "mongoose";
+import { ENV_VARS } from "./envVars.js";
 
-const connectDB = async () => {
+export const connectDB = async () => {
   try {
     await mongoose.connect(ENV_VARS.MONGO_URI, {
       useNewUrlParser: true,
@@ -13,5 +13,3 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
-module.exports = connectDB;

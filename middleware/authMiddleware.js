@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/user.model.js");
-const { ENV_VARS } = require("../configs/envVars.js");
+import jwt from "jsonwebtoken";
+import { ENV_VARS } from "../configs/envVars.js";
+import { User } from "../models/user.model.js";
 
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   try {
     // Lấy token từ header
     const token = req.headers.authorization?.split(" ")[1];
@@ -14,7 +14,7 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET);
+    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET); // Xác thực
     if (!decoded) {
       return res
         .status(401)
@@ -27,5 +27,3 @@ const authMiddleware = async (req, res, next) => {
     res.status(500).json({ success: false, message: "Lỗi máy chủ nội bộ" });
   }
 };
-
-module.exports = authMiddleware;
