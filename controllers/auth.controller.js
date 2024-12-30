@@ -6,30 +6,30 @@ import { generateToken } from "../utils/generateToken.js";
 export const signup = async (req, res) => {
   const { username, password } = req.body;
   try {
-    // if (!username || !password) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, massage: "Không được để trống" });
-    // }
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ success: false, massage: "Không được để trống" });
+    }
 
-    // const usernameRegex =
-    //   /^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){6,18}[a-zA-Z0-9]$/;
+    const usernameRegex =
+      /^[a-zA-Z0-9](_(?!(\.|_))|\.(?!(_|\.))|[a-zA-Z0-9]){6,18}[a-zA-Z0-9]$/;
 
-    // if (!usernameRegex.test(username)) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: "Username không hợp lệ" });
-    // }
+    if (!usernameRegex.test(username)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Username không hợp lệ" });
+    }
 
-    // const passwordRegex =
-    //   /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,20}$/;
+    const passwordRegex =
+      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,20}$/;
 
-    // if (!passwordRegex.test(password)) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Mật khẩu phải có chữ viết hoa, ký tự đặc biệt, 7 ký tự",
-    //   });
-    // }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: "Mật khẩu phải có chữ viết hoa, ký tự đặc biệt, 7 ký tự",
+      });
+    }
 
     const existingUserByUsername = await User.findOne({ username: username });
 
@@ -68,11 +68,11 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
   const { username, password } = req.body;
   try {
-    // if (!username || !password) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, massage: "Không được để trống" });
-    // }
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ success: false, massage: "Không được để trống" });
+    }
 
     // Tìm user theo username
     const user = await User.findOne({ username: username });
@@ -116,9 +116,7 @@ export const getUser = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      user: {
-        ...user._doc,
-      },
+      user: user._doc,
     });
   } catch (e) {
     console.log("Lỗi trong bộ điều khiển đăng ký", error.message);
