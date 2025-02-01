@@ -5,7 +5,8 @@ import { User } from "../models/user.model.js";
 export const authMiddleware = async (req, res, next) => {
   try {
     // Lấy token từ header
-    const token = req.headers.authorization?.split(" ")[1];
+    // const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers["authorization"];
 
     if (!token) {
       return res.status(401).json({
@@ -14,13 +15,21 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, ENV_VARS.JWT_SECRET); // Xác thực
+    const decoded = jwt.verify(token.split(" ")[1], ENV_VARS.JWT_SECRET); // Xác thực
     if (!decoded) {
       return res
         .status(401)
         .json({ success: false, message: "Token không hợp lệ" });
     }
-    req.user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy người dùng" });
+    }
+
+    req.user = user;
+
     next();
   } catch (error) {
     console.log("Lỗi trong phần mềm trung gian : ", error.message);

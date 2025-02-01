@@ -1,14 +1,28 @@
 import { Category } from "../models/category.model.js";
-import { Priority } from "../models/priority.model.js";
 import { Task } from "../models/task.model.js";
 
 export const addTask = async (req, res) => {
-  const { userId, title, description, dueDate, category, priority, completed } =
-    req.body;
+  const {
+    title,
+    description,
+    dueDate,
+    dueHour,
+    category,
+    priority,
+    isCompleted,
+    createdAt,
+  } = req.body;
 
   try {
-    req.body.userId = req.user._id;
-    if (!title || !description || !dueDate || !category || !priority) {
+    const userId = req.user.id;
+    if (
+      !title ||
+      !description ||
+      !dueDate ||
+      !dueHour ||
+      !category ||
+      !priority
+    ) {
       return res
         .status(400)
         .json({ success: false, messages: "Không được để trống" });
@@ -22,31 +36,29 @@ export const addTask = async (req, res) => {
       });
     }
 
-    const existingPriority = await Priority.findById(priority);
-    if (!existingPriority) {
-      return res.status(400).json({
-        success: false,
-        message: "Priority không hợp lệ.",
-      });
-    }
-
     const task = await Task.create({
       userId,
       title,
       description,
       dueDate,
+      dueHour,
       category,
       priority,
-      completed,
+      isCompleted,
+      createdAt,
     });
+
+    const populatedTask = await Task.findById(task._id)
+      .populate("category", "name icon color") // Lấy name, icon, và color từ Category
+      .exec();
 
     await task.save();
 
     res.status(201).json({
       success: true,
-      task: { ...task._doc },
+      task: { ...populatedTask._doc },
     });
-  } catch (e) {
+  } catch (error) {
     console.log("Lỗi trong bộ điều khiển đăng ký", error.message);
     res.status(500).json({ success: false, message: "Lỗi máy chủ nội bộ" });
   }
@@ -54,11 +66,10 @@ export const addTask = async (req, res) => {
 
 export const getTasks = async (req, res) => {
   try {
-    const userId = req.user.id; // Xác nhận userId từ req.user
-
-    console.log("User ID:", userId); // Debug: kiểm tra xem userId có đúng không
-
-    const tasks = await Task.find({ userId });
+    const userId = req.user.id;
+    const tasks = await Task.find({ userId })
+      .populate("category", "name icon color") // Lấy các trường cần thiết từ Category
+      .exec();
     if (tasks.length === 0) {
       return res.status(404).json({
         success: false,

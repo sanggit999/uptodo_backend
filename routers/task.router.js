@@ -5,5 +5,6 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post("/add", authMiddleware, addTask);
-router.get("/task", authMiddleware, getTasks);
+router.get("/tasks", authMiddleware, getTasks);
+
 export default router;
